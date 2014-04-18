@@ -5,10 +5,11 @@ CFLAGS		=-I.
 SRCDIR		=src
 TARGET		=bin
 INCDIR		=include
+BULDIR		=build
 
 .PHONY : clean
 
 all :
 
 clean :
-	$(RM) -r $(TARGET) 
+	$(RM) -r $(TARGET) $(BULDIR)
