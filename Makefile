@@ -1,15 +1,12 @@
-
-CC		=gcc
-CFLAGS		=-I.
-
-SRCDIR		=src
-TARGET		=bin
-INCDIR		=include
-BULDIR		=build
+include config
 
 .PHONY : clean
 
-all :
+all : init
+
+
+init :
+	mkdir -p $(TARGET)
 
 clean :
 	$(RM) -r $(TARGET) $(BULDIR)

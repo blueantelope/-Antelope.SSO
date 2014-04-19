@@ -1,0 +1,6 @@
+INCLUDE_DIR     =../include
+SRC_DIR         =../src
+CC              =gcc
+CXX             =g++
+CFLAGS          =-Wall -g -I$(INCLUDE_DIR)
+TARGET          =bin
