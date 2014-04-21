@@ -1,2 +1,7 @@
-name=root
-password=root
+[db]
+	username=root
+	password=root
+
+[test]
+	username=root
+	password=root
