@@ -7,9 +7,13 @@
 #include <locale>
 #include <stdlib.h>
 #include <cstring>
+#include <stdarg.h>
 
-#define buffer_size 1024;
-#define line_size	258;
+#define buffer_size 1024
+#define line_size	258
+#define _debug 1
+
+typedef unsigned int uint;
 
 using namespace std;
 
@@ -46,16 +50,47 @@ int count_line(istream &in) {
 	return n;
 }
 
-char *static_c(const char *c) {
+void copy_string(string s, char **new_c) {
+	const char *c = s.c_str();	
 	int len = strlen(c);
-	char *new_c;
-	new_c = (char *) malloc(len * sizeof(char));
+	*new_c = new char[len];
 	int n = 0;
 	while (n < len) {
-		*new_c = *c;	
-		new_c++, c++, n++;
+		**new_c = *c;	
+		(*new_c)++, c++, n++;
 	}
-	new_c -= n;
-	return new_c;
+	*new_c -= n;
 }
 
+void debug_println(char *msg, ...) {
+	if (_debug) {
+		char *message;
+		va_list list;
+		va_start(list, msg);
+		while (1) {
+			message = va_arg(list, char *);
+			if (strcmp(message , "/0") == 0)
+				break;
+			cout << message;
+		}
+		cout << endl;
+		va_end(list);
+	}
+}
+/*
+void debug_println(string msg, ...) {
+	if (1) {
+		string message;
+		va_list list;
+		va_start(list, msg);
+		while (1) {
+			message = va_arg(list, string);
+			if (message == NULL)
+				break;
+			cout << message;
+		}
+		cout << endl;
+		va_end("list");
+	}
+}
+*/

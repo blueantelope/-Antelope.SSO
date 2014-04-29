@@ -1,23 +1,28 @@
 #include <common.hpp>
 #include <ini_reader.hpp>
 #include <fstream>
-#include <malloc.h>
 
 IniReader :: IniReader(const char *filename) {
 	ifstream fin(filename);
-	int lines = count_line(fin);
 	fin.clear();
 	fin.seekg(0);
-	int info_len = lines * line_size;
-	info = new ini_info[info_len];
+	info = new ini_info;
 	string line;
 	int first = 1;
+	int first_node = 0;
 	int equ_index = -1;
 	int len;
 	char start;
 	char end;
+	int info_len = 0;
+	int node_len = 0;
+	hash_node *cur_hash;
+	ini_group *cur_group;
   while (getline(fin, line)) {
-		cout << line << endl;
+		/*
+		if (_debug)
+			cout << line << endl;
+		*/
 
 		line = trim(line);
 		len = line.size();
@@ -27,10 +32,23 @@ IniReader :: IniReader(const char *filename) {
 			case '[':
 				end = line.at(len-1);
 				if (end == ']') {
-					if (!first)		info->next = ++info;
-					else					first = 0;
+					ini_group *new_group = new ini_group;
+					char *group_name;
 					string name = line.substr(1, len-2);
-					info->name = static_c(name.c_str());
+					copy_string(name, &group_name);
+					new_group->name = group_name;
+					if (!first) {
+						cur_group->node->size = node_len;
+						cur_group->next = new_group;
+						node_len = 0;
+					}	else {
+						first = 0;
+						info->group = new_group;
+					}
+					cur_group = new_group;
+
+					info_len++;
+					first_node = 1;
 				}
 				break;
 			case '#':
@@ -38,22 +56,57 @@ IniReader :: IniReader(const char *filename) {
 			default:
 				equ_index = line.find('=', 0);
 				if (equ_index != -1) {
-					info->group	= new ini_group;
-					info->group->key = static_c(line.substr(0, equ_index).c_str());
-					info->group->value = static_c(line.substr(equ_index+1, len).c_str());
-					cout << "group.key = " << info->group->key << endl;
-					cout << "group.value = " << info->group->value << endl;
-					info->group++;
+					char *key;
+					string s_key = line.substr(0, equ_index);
+					copy_string(s_key, &key);
+					char *value;
+					string s_value = line.substr(equ_index+1, len);
+					copy_string(s_value, &value);
+					hash_node *new_hash = new hash_node;
+					new_hash->key = key;
+					new_hash->value = value;
+					if (!first_node) {
+						cur_hash->next = new_hash;
+					} else {
+						ini_node *new_node = new ini_node;
+						new_node->hash = new_hash;
+						cur_group->node = new_node;
+						first_node = 0;
+					}
+					cur_hash = new_hash;
+					
+					node_len++;
 				}
 				break;
 		}
   }
+	info->size = info_len;
 
-
- fin.close();
+	fin.close();
 }
 
 char* IniReader :: getValue(const char *name, const char *key) {
-			
+	int n = 0;
+	ini_group *cur_group = info->group;
+	hash_node *cur_hash;
+	while (n < info->size) {
+		if (n > 0)
+			cur_group = cur_group->next;
+		if (strcmp(name, cur_group->name) == 0) {
+			int m = 0;
+			while (m < cur_group->node->size) {
+				if (m == 0)
+					cur_hash = cur_group->node->hash;
+				else
+					cur_hash = cur_hash->next;
+				if (strcmp(key, cur_hash->key) == 0) 
+					return cur_hash->value;
+				m++;
+			}
+			break;
+		}
+		n++;
+	}
 
+	return NULL;
 }

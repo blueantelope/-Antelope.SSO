@@ -1,13 +1,23 @@
-typedef struct _ini_group {
+typedef struct _hash_node {
   char *key;
   char *value;
-  struct _ini_group *next;
+  struct _hash_node *next;
+} hash_node;
+
+typedef struct _ini_node {
+	hash_node *hash;
+	int size;
+} ini_node;
+
+typedef struct _ini_group {
+	char *name;
+	ini_node *node;
+	struct _ini_group *next;
 } ini_group;
 
 typedef struct _ini_info {
-	char *name;
 	ini_group *group;
-	struct _ini_info *next;
+	int size;
 } ini_info;
 
 class IniReader {
