@@ -80,6 +80,7 @@ IniReader :: IniReader(const char *filename) {
 				break;
 		}
   }
+	cur_group->node->size = node_len;
 	info->size = info_len;
 
 	fin.close();
@@ -88,16 +89,14 @@ IniReader :: IniReader(const char *filename) {
 char* IniReader :: getValue(const char *name, const char *key) {
 	int n = 0;
 	ini_group *cur_group = info->group;
-	hash_node *cur_hash;
+	hash_node *cur_hash = cur_group->node->hash;
 	while (n < info->size) {
 		if (n > 0)
 			cur_group = cur_group->next;
 		if (strcmp(name, cur_group->name) == 0) {
 			int m = 0;
 			while (m < cur_group->node->size) {
-				if (m == 0)
-					cur_hash = cur_group->node->hash;
-				else
+				if (m > 0)
 					cur_hash = cur_hash->next;
 				if (strcmp(key, cur_hash->key) == 0) 
 					return cur_hash->value;
