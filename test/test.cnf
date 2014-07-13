@@ -1,7 +1,7 @@
 [db]
-	username=root
-	password=root
+username=root
+password=password
 
 [test]
-	username=root
-	password=root
+username=root
+password=password

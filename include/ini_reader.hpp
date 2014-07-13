@@ -1,3 +1,5 @@
+#include "constant.hpp"
+
 typedef struct _hash_node {
   char *key;
   char *value;
@@ -5,19 +7,19 @@ typedef struct _hash_node {
 } hash_node;
 
 typedef struct _ini_node {
-	hash_node *hash;
-	int size;
+  hash_node *hash;
+  int size;
 } ini_node;
 
 typedef struct _ini_group {
-	char *name;
-	ini_node *node;
-	struct _ini_group *next;
+  char *name;
+  ini_node *node;
+  struct _ini_group *next;
 } ini_group;
 
 typedef struct _ini_info {
-	ini_group *group;
-	int size;
+  ini_group *group;
+  int size;
 } ini_info;
 
 class IniReader {
