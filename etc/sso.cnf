@@ -1,2 +1,3 @@
 [server]
-  port    =10926
+  bind_ip   =127.0.0.1
+  port      =10926

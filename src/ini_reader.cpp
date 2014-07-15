@@ -108,3 +108,10 @@ char* IniReader :: getValue(const char *name, const char *key) {
 
   return NULL;
 }
+
+int IniReader :: getIntValue(const char *name, const char *key) {
+  char *v;
+  v = getValue(name, key);
+
+  return 0;
+}

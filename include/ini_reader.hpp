@@ -26,6 +26,7 @@ class IniReader {
   public:
     IniReader(const char *filename);
     char *getValue(const char *name, const char *key);
+    int getIntValue(const char *name, const char *key);
   private:
     ini_info *info;
 };
