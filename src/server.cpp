@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "../include/server.hpp"
 
 Server :: Server(server_info *info) {
@@ -25,12 +26,38 @@ void Server :: start() {
 void Server :: run() {
   cout << "Server run" << endl;
   while (1) {
-    socklen_t sin_size = sizeof(struct sockaddr_in);
-    if ((accept_fd = accept(socket_fd, (struct sockaddr*) &client_addr, &sin_size)) == -1 ) {
-      throw "accept() failed";
+    int accept_fd = connect();
+    if (accept_fd == -1)
       continue;
-    }
-
-    cout << "connection from " << (char*) inet_ntoa(client_addr.sin_addr) << endl;
+    recieve(accept_fd);
   }
+}
+
+int Server :: connect() {
+  sockaddr_in client_addr;
+  socklen_t sin_size = sizeof(struct sockaddr_in);
+  int accept_fd;
+  if ((accept_fd = accept(socket_fd, (struct sockaddr*) &client_addr, &sin_size)) == -1 ) {
+    throw "accept() failed";
+    return -1;
+  }
+
+  cout << "connection from " << (char*) inet_ntoa(client_addr.sin_addr) << endl;
+  return accept_fd;
+}
+
+void Server :: recieve(int accept_fd) {
+  char buffer[BUFFER_SIZE];
+  memset(buffer, 0, BUFFER_SIZE);
+  while ((read(accept_fd, buffer, BUFFER_SIZE)) != -1) {
+    cout << "recieve message: " << buffer;
+  }
+}
+
+void Server :: write(int accept_fd) {
+
+}
+
+void Server :: close(int accept_fd) {
+  close(accept_fd);
 }

@@ -7,13 +7,20 @@ typedef struct _server_info {
   int port;
 } server_info;
 
+#define BUFFER_SIZE 1024
+
 class Server {
   public:
     Server(server_info *info);
     void start();
   private:
     server_info *sinfo;
-    int socket_fd, accept_fd;
-    sockaddr_in server_addr, client_addr;
+    int socket_fd;
+    sockaddr_in server_addr;
     void run();
+
+    int connect();
+    void recieve(int);
+    void write(int);
+    void close(int);
 };
