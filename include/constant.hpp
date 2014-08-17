@@ -13,4 +13,9 @@ typedef unsigned long ulong;
 
 #define pvoid void *
 
+#define err_sys(info) {                               \
+  fprintf(stderr, "%s:%s\n", info, strerror(errno));  \
+  exit(EXIT_FAILURE);                                 \
+}
+
 using namespace std;

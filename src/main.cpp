@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <cstring>
+#include <signal.h>
 #include "../include/constant.hpp"
 #include "../include/common.hpp"
 #include "../include/ini_reader.hpp"
@@ -10,10 +11,13 @@
 char *cnf_filepath = NULL;
 IniReader iniReader = NULL;
 server_info sinfo;
+Server *server = NULL;
 
 void setDefCnf();
 void opt_handle(int, char **);
 void init();
+void exception_handle();
+void sys_exit(int signo);
 
 void setDefCnf() {
   if (cnf_filepath == NULL) {
@@ -53,15 +57,28 @@ void init() {
   sinfo.port = iniReader.getIntValue("server", "port");
 }
 
+void exception_handle() {
+  signal(SIGHUP, sys_exit);
+  signal(SIGINT, sys_exit);
+  signal(SIGKILL, sys_exit);
+}
+
+void sys_exit(int signo) {
+  if (server != NULL)
+    server->stop();
+  exit(-1);
+}
+
 void run() {
-  Server server(&sinfo);
-  server.start();
+  server = new Server(&sinfo);
+  server->start();
 }
 
 int main(int argc, char **argv) {
   opt_handle(argc, argv);
   cout << "Application Start..." << endl;
   init();
+  exception_handle();
   run();
 
   return 1;
