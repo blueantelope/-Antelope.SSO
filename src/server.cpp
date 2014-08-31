@@ -94,12 +94,13 @@ int Server :: my_accept() {
 }
 
 void* Server :: my_receive(void *afd_p) {
-  int accept_fd = atoi((char *)afd_p);
+  int accept_fd = *(int *)afd_p;
   cout << "receive from " << accept_fd << endl;
   char buffer[BUFFER_SIZE];
   memset(buffer, 0, BUFFER_SIZE);
   while ((read(accept_fd, buffer, BUFFER_SIZE)) != -1) {
     cout << "recieve message: " << buffer;
+    memset(buffer, 0, BUFFER_SIZE);
   }
 
   return ((void *) 0);

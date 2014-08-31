@@ -1,4 +1,4 @@
-#include "../include/constant.hpp"
+#include "constant.hpp"
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <pthread.h>

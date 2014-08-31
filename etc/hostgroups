@@ -1,0 +1,6 @@
+g1:n1:password:127.0.0.1:http://127.0.0.1:9090
+g1:n2:password:127.0.0.1:http://127.0.0.1:9091
+g1:n3:password:127.0.0.1:http://127.0.0.1:9092
+g2:n4:password:www.blueantelope.net:http://www.blueantelope.net/blog
+g2:n5:password:www.blueantelope.net:http://www.blueantelope.net/bbs
+g2:n6:password:www.blueantelope.net:http://www.blueantelope.net/test

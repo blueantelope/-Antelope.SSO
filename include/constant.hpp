@@ -19,3 +19,25 @@ typedef unsigned long ulong;
 }
 
 using namespace std;
+
+typedef struct _server_vendor {
+  uint id;
+  char *name;
+  char *password;
+  char *host;
+  char *domain;
+
+  void init() {
+    id = -1;
+    name = NULL;
+    password = NULL;
+    host = NULL;
+    domain = NULL;
+  };
+
+  int alive() {
+    if (id != -1) return 1;
+    return 0;
+  };
+} server_vendor;
+

@@ -8,22 +8,69 @@
 
 #define ERR_CNF_NOTSET (const char*)("global cnf file not set, program eixt")
 #define CNF_DEFFILE (const char*)("./etc/sso.cnf")
+#define ERR_HOSTGROUPS_NOTSET (const char*)("hostgroups file not set, program eixt")
+#define HOSTGROUPS_DEFFILE (const char*)("./etc/hostgroups")
+#define ERR_USERMAP_NOTSET (const char*)("usermap file not set, program eixt")
+#define USERMAP_DEFFILE (const char*)("./etc/usermap")
+
 char *cnf_filepath = NULL;
+char *hostgroups_filepath = NULL;
+char *usermap_filepath = NULL;
 IniReader iniReader = NULL;
 server_info sinfo;
 Server *server = NULL;
 
+void setDefEtc();
 void setDefCnf();
+void setDefHostgroups();
+void setDefUsermap();
 void opt_handle(int, char **);
 void init();
 void exception_handle();
 void sys_exit(int signo);
+
+void setDefEtc() {
+  setDefCnf();
+  setDefHostgroups();
+  setDefUsermap();
+}
 
 void setDefCnf() {
   if (cnf_filepath == NULL) {
   #ifdef CNF_DEFFILE
     cnf_filepath = (char *)CNF_DEFFILE;
   #endif
+  }
+
+  if (cnf_filepath == NULL) {
+    cout << ERR_CNF_NOTSET << endl;
+    exit(-1);
+  }
+}
+
+void setDefHostgroups() {
+  if (hostgroups_filepath == NULL) {
+  #ifdef HOSTGROUPS_DEFFILE
+    hostgroups_filepath = (char *)HOSTGROUPS_DEFFILE;
+  #endif
+  }
+
+  if (hostgroups_filepath == NULL) {
+    cout << ERR_HOSTGROUPS_NOTSET << endl;
+    exit(-1);
+  }
+}
+
+void setDefUsermap() {
+  if (usermap_filepath == NULL) {
+  #ifdef USERMAP_DEFFILE
+    usermap_filepath = (char *)USERMAP_DEFFILE;
+  #endif
+  }
+
+  if (usermap_filepath == NULL) {
+    cout << ERR_USERMAP_NOTSET << endl;
+    exit(-1);
   }
 }
 
@@ -37,17 +84,23 @@ void opt_handle(int argc, char **argv) {
         cnf_filepath = (char*) calloc(opt_len+1, sizeof(char));
         memcpy(cnf_filepath, optarg, opt_len);
         break;
+      case 'h':
+        opt_len = strlen(optarg);
+        hostgroups_filepath = (char*) calloc(opt_len+1, sizeof(char));
+        memcpy(hostgroups_filepath, optarg, opt_len);
+        break;
+     case 'u':
+        opt_len = strlen(optarg);
+        usermap_filepath = (char*) calloc(opt_len+1, sizeof(char));
+        memcpy(usermap_filepath, optarg, opt_len);
+        break;
       default:
 
         break;
     }
   }
-  setDefCnf();
 
-  if (cnf_filepath == NULL) {
-    cout << ERR_CNF_NOTSET << endl;
-    exit(-1);
-  }
+  setDefEtc();
 }
 
 void init() {

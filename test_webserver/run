@@ -1,0 +1,72 @@
+#!/bin/bash
+
+#**************************************
+# blueantelope@gmail.com 2014-08-31
+#**************************************
+
+CUR_DIR=$(cd "$(dirname "$0")"; pwd)
+SRC_DIR=$CUR_DIR/src
+INS_DIR=$CUR_DIR/install
+
+install() {
+  mkdir $INS_DIR
+  SERVER_NUM=2
+  if [ $# == 2 ]; then
+    SERVER_NUM = $2
+  fi
+  n=1
+  while [ "$n" -le "$SERVER_NUM" ]; do
+    SRV_DIR=$INS_DIR/server$n
+    mkdir $SRV_DIR
+    cp -rf $SRC_DIR/* $SRV_DIR
+    find $SRV_DIR -name "*.pyc" -exec rm -rf {} +
+    find $SRV_DIR -name ".*" -exec rm -rf {} +
+    n=$(expr $n + 1)
+  done
+}
+
+clear() {
+  rm -rf $INS_DIR
+}
+
+start() {
+  echo "web server start..."
+  SERVER_SPORT=9090
+  if [ $# == 2 ]; then
+    SERVER_SPORT=$2
+  fi
+  SERVER_NUM=$(ls $INS_DIR|wc -l)
+  s_port=$SERVER_SPORT
+  for d in $(ls $INS_DIR); do
+    cd $INS_DIR/$d;python server.py start $s_port &
+    echo "server run on $s_port, location $INS_DIR/$d"
+    s_port=$(expr $s_port + 1)
+  done
+}
+
+stop() {
+  echo "web server stop..."
+  SERVER_NUM=$(ls $INS_DIR|wc -l)
+  for d in $(ls $INS_DIR); do
+    cd $INS_DIR/$d;python server.py stop
+  done
+}
+
+case "$1" in
+  start)
+    start
+  ;;
+  stop)
+    stop
+  ;;
+  restart)
+    stop
+    start
+  ;;
+  install)
+    install
+  ;;
+  clear)
+    clear
+  ;;
+esac

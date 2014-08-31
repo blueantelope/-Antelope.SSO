@@ -10,6 +10,10 @@ main.o : $(SRC_DIR)/main.cpp
 	@echo "compile main.o"
 	$(CXX) $(CFLAGS) -o $(TMP)/main.o -c $(SRC_DIR)/main.cpp
 
+session.o : $(SRC_DIR)/session.cpp
+	@echo "compile session.o"
+	$(CXX) $(CFLAGS) -o $(TMP).session.o -c $(SRC_DIR)/session.cpp
+
 server.o : $(SRC_DIR)/server.cpp
 	@echo "compile server.o"
 	$(CXX) $(CFLAGS) -o $(TMP)/server.o -c $(SRC_DIR)/server.cpp
