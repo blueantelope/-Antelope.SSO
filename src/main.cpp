@@ -8,8 +8,8 @@
 
 #define ERR_CNF_NOTSET (const char*)("global cnf file not set, program eixt")
 #define CNF_DEFFILE (const char*)("./etc/sso.cnf")
-#define ERR_HOSTGROUPS_NOTSET (const char*)("hostgroups file not set, program eixt")
-#define HOSTGROUPS_DEFFILE (const char*)("./etc/hostgroups")
+#define ERR_HOSTGROUPS_NOTSET (const char*)("hostgroup file not set, program eixt")
+#define HOSTGROUPS_DEFFILE (const char*)("./etc/hostgroup")
 #define ERR_USERMAP_NOTSET (const char*)("usermap file not set, program eixt")
 #define USERMAP_DEFFILE (const char*)("./etc/usermap")
 

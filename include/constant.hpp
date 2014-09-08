@@ -7,9 +7,10 @@
 #define buffer_size   1024
 #define line_size     258
 
-typedef unsigned short ushrot;
+typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
+typedef unsigned char byte;
 
 #define pvoid void *
 
@@ -20,6 +21,7 @@ typedef unsigned long ulong;
 
 using namespace std;
 
+/*
 typedef struct _server_vendor {
   uint id;
   char *name;
@@ -40,4 +42,4 @@ typedef struct _server_vendor {
     return 0;
   };
 } server_vendor;
-
+*/

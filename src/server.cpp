@@ -1,7 +1,8 @@
 #include <unistd.h>
+#include "../include/common.hpp"
 #include "../include/server.hpp"
 
-Server :: Server(server_info *info) {
+Server :: Server(host_info *info) {
   sinfo = info;
   socket_fd = -1;
   pthread_mutex_init(&accept_fd_lock, NULL);
@@ -19,7 +20,7 @@ void Server :: stop() {
 void Server :: halt() {
   cout << "server halt" << endl;
   Server::clear_accept_fd_set();
-  Server::my_shutdown();
+  Server::sso_shutdown();
 }
 
 void Server :: start() {
@@ -28,12 +29,12 @@ void Server :: start() {
     throw "socket failed";
   }
 
-  if (my_bind() < 0) {
+  if (sso_bind() < 0) {
     err_sys("bind failed");
     throw "bind failed";
   }
 
-  if (my_listen() < 0) {
+  if (sso_listen() < 0) {
     err_sys("listen failed");
     throw "listen failed";
   }
@@ -46,14 +47,14 @@ void Server :: run() {
   int clients = 0;
   int pc;
   while (1) {
-    int accept_fd = my_accept();
+    int accept_fd = sso_accept();
     if (accept_fd != -1) {
       if (clients > MAX_CLIENTS) {
         cout << "ERROR: not accept, max client limit" << endl;
-        Server::my_close(accept_fd);
+        Server::sso_close(accept_fd);
         continue;
       }
-      pc = pthread_create(&client_thread[clients], NULL, Server::my_receive, &accept_fd);
+      pc = pthread_create(&client_thread[clients], NULL, Server::sso_receive, &accept_fd);
       if (pc)
         cout << "ERROR, thread id of client is " << pc << endl;
       else
@@ -62,7 +63,7 @@ void Server :: run() {
   }
 }
 
-int Server :: my_bind() {
+int Server :: sso_bind() {
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = inet_addr(sinfo->host);
@@ -71,7 +72,7 @@ int Server :: my_bind() {
   return bind(socket_fd, (sockaddr *) &server_addr, sizeof(server_addr));
 }
 
-int Server :: my_listen() {
+int Server :: sso_listen() {
   char *ptr;
   int backlog = BACKLOG;
   if ((ptr = getenv("LISTENQ")) != NULL)
@@ -80,7 +81,7 @@ int Server :: my_listen() {
   return listen(socket_fd, backlog);
 }
 
-int Server :: my_accept() {
+int Server :: sso_accept() {
   sockaddr_in client_addr;
   socklen_t sin_size = sizeof(struct sockaddr_in);
   int accept_fd = accept(socket_fd, (struct sockaddr*) &client_addr, &sin_size);
@@ -89,32 +90,52 @@ int Server :: my_accept() {
     return -1;
   }
 
-  cout << "connection from " << (char*) inet_ntoa(client_addr.sin_addr) << endl;
+  cout << "connection from " << (char*) inet_ntoa(client_addr.sin_addr) << ":" << ntohs(client_addr.sin_port) << endl;
   return accept_fd;
 }
 
-void* Server :: my_receive(void *afd_p) {
+void* Server :: sso_receive(void *afd_p) {
   int accept_fd = *(int *)afd_p;
   cout << "receive from " << accept_fd << endl;
+  int rd = 0;
   char buffer[BUFFER_SIZE];
   memset(buffer, 0, BUFFER_SIZE);
-  while ((read(accept_fd, buffer, BUFFER_SIZE)) != -1) {
-    cout << "recieve message: " << buffer;
+  while ((rd = read(accept_fd, buffer, BUFFER_SIZE)) != -1) {
+    if (rd == 0) {
+      cout << "connect closed by peer" << endl;
+      break;
+    }
+    cout << "recieve message: " << buffer << endl;
     memset(buffer, 0, BUFFER_SIZE);
+    Server::sso_write(accept_fd, (char *) "logon from sso server");
   }
 
   return ((void *) 0);
 }
 
-void Server :: write(int accept_fd) {
+void Server :: sso_write(int accept_fd, char *msg) {
+  int len = strlen(msg);
+  int pos = 0;
+  while (len > 0) {
+    cout << "send len:" << len << endl;
+    if ((pos = write(accept_fd, msg, len)) <= 0) {
+      cout << "send pos:" << pos << endl;
+      if (pos < 0 && errno == EINTR)
+        pos = 0;
+      else
+        break;
+    }
 
+    len -= pos;
+    msg += pos;
+  }
 }
 
-void Server :: my_close(int accept_fd) {
+void Server :: sso_close(int accept_fd) {
   close(accept_fd);
 }
 
-void Server :: my_shutdown() {
+void Server :: sso_shutdown() {
   if (socket_fd != -1)
     shutdown(socket_fd, SHUT_RDWR);
 }
@@ -131,7 +152,7 @@ void Server :: delete_accept_fd(int accept_fd) {
   pthread_mutex_lock(&accept_fd_lock);
   int index = get_accept_fd(accept_fd);
   if (index != -1) {
-    Server::my_close(accept_fd);
+    Server::sso_close(accept_fd);
     accept_fd_set[index] = -1;
   }
   pthread_mutex_unlock(&accept_fd_lock);
@@ -142,7 +163,7 @@ void Server :: clear_accept_fd_set() {
   int n = 0;
   while (n < MAX_CLIENTS) {
     if (accept_fd_set[n] != -1)
-      Server::my_close(accept_fd_set[n]);
+      Server::sso_close(accept_fd_set[n]);
     n++;
   }
 
@@ -159,3 +180,4 @@ int Server :: get_accept_fd(int accept_fd) {
 
   return -1;
 }
+
