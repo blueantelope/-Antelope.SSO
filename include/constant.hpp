@@ -6,6 +6,7 @@
 #define _debug        1
 #define buffer_size   1024
 #define line_size     258
+#define max_line      100
 
 typedef unsigned short ushort;
 typedef unsigned int uint;

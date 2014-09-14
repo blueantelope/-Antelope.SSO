@@ -86,20 +86,10 @@ void debug_print(char *msg, ...) {
     va_end(list);
   }
 }
-/*
-   void debug_println(string msg, ...) {
-   if (1) {
-   string message;
-   va_list list;
-   va_start(list, msg);
-   while (1) {
-   message = va_arg(list, string);
-   if (message == NULL)
-   break;
-   cout << message;
-   }
-   cout << endl;
-   va_end("list");
-   }
-   }
-   */
+
+char int2char(int d) {
+  char *c;
+  c = (char *) malloc(1 * sizeof(char));
+  sprintf(c, "%d", d);
+  return *c;
+}

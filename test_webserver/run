@@ -70,6 +70,6 @@ case "$1" in
     clear
   ;;
   *)
-    echo "invalidate parameter, start | stop | resstart | install | clear"
+    echo "invalidate parameter, start | stop | restart | install | clear"
   ;;
 esac

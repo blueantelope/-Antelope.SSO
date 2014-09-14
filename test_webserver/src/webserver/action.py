@@ -1,14 +1,32 @@
 
 from django.http import HttpRequest
 from django.http import HttpResponse
+import struct
+
+class Header:
+  def __init__(self, argp):
+    self.version = 1
+    if argp['version'] is not None:
+      self.version = argp['version']
+    self.sn = argp['sn']
+    self.action = argp['action']
+    self.password = argp['password']
+    self.dlen = len(argp['domain'])
+    self.domain = argp['domain']
+    self.blen = 0
+
+  def toPacket(self):
+    return struct.pack('!bsbsHsI', self.version, self.sn, self.action, self.password, self.dlen, self.domain, self.blen)
 
 class SsoSession:
   keys = ['sessionid', 'domain', 'tokenid', 'logon']
   values = {}
   _debug = False
 
-  def __init__(self, _debug):
-    self._debug = _debug
+  def __init__(self, argp):
+    self.header = Header(argp['header'])
+    if argp['debug'] is not None:
+      self._debug = argp['debug']
 
   def put(self, info):
     if info is not None:
@@ -23,6 +41,24 @@ class SsoSession:
     for k, v in self.values.items():
       if self.values[k] is not None:
         print(k + '=' + str(v))
+  
+  def bodyLen(self):
+    length = 0
+    for k, v in self.values.items():
+      length = length + len(v)
+    return length
+
+  def toBodyPacket(self):
+    body_packet = ''
+    for k, v in self.values.items():
+      body_packet = body_packet + struct.pack('!s', str(v))
+    return body_packet
+
+  def toPacket(self):
+    self.header.blen = self.bodyLen()
+    header_packet = self.header.toPacket()
+    body_packet = self.toBodyPacket()
+    return header_packet + body_packet
 
   def tostr(self):
     s = ''
@@ -51,16 +87,26 @@ class SsoSender:
   def verify(self, session):
     if self.connecter is None:
       self.connect()
-    print "=============verify================"
-    print "send:"
-    print "\t"+session.tostr()
+    print '=============verify================'
+    print 'send str:'
+    print '\t' + session.tostr()
+    print 'send packet:'
+    print '\t' + session.toPacket()
     self.connecter.send(session.tostr())
-    print "receive:"
-    print "\t"+self.connecter.recv(1024)
-    print "===================================="
+    print 'receive:'
+    print '\t' + self.connecter.recv(1024)
+    print '===================================='
 
-
-sso_session = SsoSession(True)
+sso_session = SsoSession({
+  'header': {
+    'version': 1,
+    'sn': '11111111111111',
+    'action': 1,
+    'password': '1111111111111111',
+    'domain': 'www.blueantelope'
+  },
+  'debug': True
+})
 sso_sender = SsoSender(None)
 
 def index(request):

@@ -11,3 +11,4 @@ int count_line(string);
 int count_line(istream&);
 void copy_string(string, char **);
 void debug_print(char *, ...);
+char int2char(int);

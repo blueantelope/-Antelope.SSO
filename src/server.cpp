@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include "../include/common.hpp"
 #include "../include/server.hpp"
 
 Server :: Server(host_info *info) {
