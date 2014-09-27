@@ -28,7 +28,7 @@ test_server_packet.o : test_server_packet.cpp
 
 test_server : init common.o ini_reader.o server.o test_server.o
 	@echo "generate test_server"
-	$(CXX) $(TMP)/common.o $(TMP)/ini_reader.o $(TMP)/server.o $(TMP)/test_server.o -o $(TARGET)/test_server
+	$(CXX) $(TMP)/common.o $(TMP)/ini_reader.o $(TMP)/server.o $(TMP)/test_server.o -o $(TARGET)/test_server -lpthread
 
 test_server.o : test_server.cpp
 	@echo "compile test_server"
