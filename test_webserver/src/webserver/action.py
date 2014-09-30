@@ -13,10 +13,16 @@ class Header:
     self.password = argp['password']
     self.dlen = len(argp['domain'])
     self.domain = argp['domain']
-    self.blen = 0
+    self.num = 0
 
   def toPacket(self):
-    return struct.pack('!bsbsHsI', self.version, self.sn, self.action, self.password, self.dlen, self.domain, self.blen)
+    format = '!b14sb16sH' + str(self.dlen) + 'sH'
+    packet = struct.pack(format, self.version, self.sn, self.action, self.password, self.dlen, self.domain, self.num)
+    print 'header: ' + repr(packet)
+    return packet
+
+  def size(self):
+    return 1 + 14 + 1 + 16 + self.dlen + 2
 
 class SsoSession:
   keys = ['sessionid', 'domain', 'tokenid', 'logon']
@@ -36,29 +42,37 @@ class SsoSession:
             self.values[k] = info[k]
     if (self._debug):
       self.debug()
-  
+
   def debug(self):
     for k, v in self.values.items():
       if self.values[k] is not None:
         print(k + '=' + str(v))
-  
-  def bodyLen(self):
-    length = 0
-    for k, v in self.values.items():
-      length = length + len(v)
-    return length
+
+  def bodyNum(self):
+    return len(self.values)
 
   def toBodyPacket(self):
     body_packet = ''
     for k, v in self.values.items():
-      body_packet = body_packet + struct.pack('!s', str(v))
+      content = str(k) + '=' + str(v)
+      clen = len(content)
+      format = '!H' + str(clen) + 's'
+      body_packet = body_packet + struct.pack(format, clen, content)
+    print 'body: ' + str(body_packet)
     return body_packet
 
   def toPacket(self):
-    self.header.blen = self.bodyLen()
+    self.header.num = self.bodyNum()
     header_packet = self.header.toPacket()
-    body_packet = self.toBodyPacket()
-    return header_packet + body_packet
+    packet = header_packet
+    offset = self.header.size()
+    for k, v in self.values.items():
+      content = str(k) + '=' + str(v)
+      clen = len(content)
+      format = '!H' + str(clen) + 's'
+      struct.pack_into(format, packet, offset, clen, content)
+      offset = offset + clen + 2
+    return packet
 
   def tostr(self):
     s = ''
@@ -88,11 +102,7 @@ class SsoSender:
     if self.connecter is None:
       self.connect()
     print '=============verify================'
-    print 'send str:'
-    print '\t' + session.tostr()
-    print 'send packet:'
-    print '\t' + session.toPacket()
-    self.connecter.send(session.tostr())
+    self.connecter.send(session.toPacket())
     print 'receive:'
     print '\t' + self.connecter.recv(1024)
     print '===================================='
@@ -100,9 +110,9 @@ class SsoSender:
 sso_session = SsoSession({
   'header': {
     'version': 1,
-    'sn': '11111111111111',
+    'sn': '22222222222222',
     'action': 1,
-    'password': '1111111111111111',
+    'password': '3333333333333333',
     'domain': 'www.blueantelope'
   },
   'debug': True

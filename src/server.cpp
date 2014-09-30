@@ -104,8 +104,8 @@ void* Server :: sso_receive(void *afd_p) {
       cout << "connect closed by peer" << endl;
       break;
     }
-    cout << "recieve message: " << buffer << endl;
-    memset(buffer, 0, BUFFER_SIZE);
+    cout << "recieve size: " << rd << endl;
+    Server::printHex(buffer, 0, rd);
     Server::sso_write(accept_fd, (char *) "logon from sso server");
   }
 
@@ -180,3 +180,17 @@ int Server :: get_accept_fd(int accept_fd) {
   return -1;
 }
 
+void Server :: printHex(char *msg, int start, int end) {
+  msg += start;
+  int len = end - start;
+  int n = 0;
+  printf("================================\n");
+  while (n < len) {
+    if (n != 0 && n % 16 == 0)
+      printf("\n");
+    printf("0x%.2x ", (int) *msg);
+    msg++;
+    n++;
+  }
+  printf("\n================================\n");
+}
