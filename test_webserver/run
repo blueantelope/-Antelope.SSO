@@ -1,4 +1,4 @@
-#!/bin/bash
+u!/bin/bash
 
 #**************************************
 # blueantelope@gmail.com 2014-08-31
@@ -9,6 +9,7 @@ SRC_DIR=$CUR_DIR/src
 INS_DIR=$CUR_DIR/install
 
 install() {
+	pip install django
   mkdir $INS_DIR
   SERVER_NUM=2
   if [ $# == 2 ]; then

@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 
 #define _debug        1
 #define buffer_size   1024
