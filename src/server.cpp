@@ -184,13 +184,51 @@ void Server :: printHex(char *msg, int start, int end) {
   msg += start;
   int len = end - start;
   int n = 0;
-  printf("================================\n");
+  printf("=========================================================================================\n");
   while (n < len) {
-    if (n != 0 && n % 16 == 0)
-      printf("\n");
-    printf("0x%.2x ", (int) *msg);
+    if (n != 0) {
+      if (n % 16 == 0) {
+        char *hex_msg;
+        hex_msg = Server::fetchMsg(msg, 16);
+        printf("\t%s\n", hex_msg);
+      } else if (n % 8 == 0) {
+        printf("  ");
+      }
+    }
+    printf("%.2x ", (int) *msg);
     msg++;
     n++;
+    if (n == len && n % 16 != 0) {
+      int last = n % 16;
+      char *hex_msg;
+      hex_msg = fetchMsg(msg, last);
+      int m = 0;
+      while (m < (16 - last)) {
+        if ((m + last) % 8 == 0)
+          printf("     ");
+        else
+          printf("   ");
+        m++;
+      }
+      printf("\t%s\n", hex_msg);
+    }
   }
-  printf("\n================================\n");
+  printf("=========================================================================================\n");
+}
+
+char* Server :: fetchMsg(char *msg, int len) {
+  int n = 0;
+  msg -= len;
+  char *ret_msg;
+  ret_msg = (char *) calloc(len + 1, sizeof(char));
+  while (n < len) {
+    char c = *msg;
+    if (c < 21 || c > 126)
+      c = '.';
+    *ret_msg = c;
+    msg++; ret_msg++; n++;
+  }
+
+  ret_msg -= n;
+  return ret_msg;
 }

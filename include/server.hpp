@@ -170,4 +170,5 @@ class Server {
     void clear_accept_fd_set();
     int get_accept_fd(int);
     static void printHex(char *,  int, int);
+    static char *fetchMsg(char *, int);
 };

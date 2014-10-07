@@ -1,7 +1,11 @@
+#!/usr/bin/env python
+#encoding: utf8
 
 from django.http import HttpRequest
 from django.http import HttpResponse
 import struct
+import array
+import binascii
 
 class Header:
   def __init__(self, argp):
@@ -16,9 +20,18 @@ class Header:
     self.num = 0
 
   def toPacket(self):
-    format = '!b14sb16sH' + str(self.dlen) + 'sH'
-    packet = struct.pack(format, self.version, self.sn, self.action, self.password, self.dlen, self.domain, self.num)
-    print 'header: ' + repr(packet)
+    format = '!b'
+    n = 0
+    while n < 14:
+      format = format + 'b'
+      n = n + 1
+    format = format + 'b16sH' + str(self.dlen) + 'sH'
+    values = [self.version]
+    for c in self.sn:
+      values.append(int(c))
+    values.extend([self.action, self.password, self.dlen, self.domain, self.num])
+    s = struct.Struct(format)
+    packet = s.pack(*values)
     return packet
 
   def size(self):
@@ -58,21 +71,13 @@ class SsoSession:
       clen = len(content)
       format = '!H' + str(clen) + 's'
       body_packet = body_packet + struct.pack(format, clen, content)
-    print 'body: ' + str(body_packet)
     return body_packet
 
   def toPacket(self):
     self.header.num = self.bodyNum()
     header_packet = self.header.toPacket()
-    packet = header_packet
-    offset = self.header.size()
-    for k, v in self.values.items():
-      content = str(k) + '=' + str(v)
-      clen = len(content)
-      format = '!H' + str(clen) + 's'
-      struct.pack_into(format, packet, offset, clen, content)
-      offset = offset + clen + 2
-    return packet
+    body_packet = self.toBodyPacket()
+    return header_packet + body_packet
 
   def tostr(self):
     s = ''
@@ -102,7 +107,9 @@ class SsoSender:
     if self.connecter is None:
       self.connect()
     print '=============verify================'
-    self.connecter.send(session.toPacket())
+    packet = session.toPacket()
+    print 'send packet: ' + repr(packet)
+    self.connecter.send(packet)
     print 'receive:'
     print '\t' + self.connecter.recv(1024)
     print '===================================='
@@ -155,7 +162,7 @@ def logon(request):
 def sessionContent(request):
   session = request.session
   s = '=======================session=======================</br>'
-  s += session.session_key + '</br>'
+  s += str(session.session_key) + '</br>'
   for k, v in session.items():
     s += k + '=' + str(v) + '</br>'
   s += '=====================================================</br>'
